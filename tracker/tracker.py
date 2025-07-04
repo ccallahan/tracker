@@ -1,12 +1,7 @@
 """Welcome to Reflex! This file outlines the steps to create a basic app."""
 
 import os
-import PIL.Image
 import requests
-import staticmap
-import PIL
-import base64
-from io import BytesIO
 
 import reflex as rx
 
@@ -26,7 +21,7 @@ class State(rx.State):
     """The app state."""
 
     data: str = ""
-    img: str = ""
+    delay: str = ""
 
     @rx.event
     def get_train_status(self):
@@ -59,6 +54,7 @@ class State(rx.State):
                     curr_sch_dep = str(x["schDep"])
                     curr_dep = str(x["dep"])
                     curr_delay = calculate_schedule_diff(curr_sch_dep, curr_dep)
+                    self.delay = str(curr_delay)
 
 
                     if train_data_root == "40":
@@ -212,7 +208,16 @@ def index() -> rx.Component:
             ),
             rx.divider(),
             rx.flex(
-                rx.text(State.data, size="9"),
+                rx.vstack(
+                    rx.text(State.data, size="9"),
+                    rx.fragment("Current Delay: " + State.delay + " minutes"),
+                    rx.button(
+                        "Refresh Train Status",
+                        on_click=State.get_train_status,
+                        color_scheme="blue",
+                        size="3",
+                    ),
+                ),
                 align="center",
                 justify="center",
             ),
